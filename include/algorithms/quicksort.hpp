@@ -2,7 +2,6 @@
 #define IMALGORITHM_QUICKSORT_HPP
 
 #include <algorithm>
-// #include <iostream>
 #include <random>
 #include <ranges>
 #include <vector>
@@ -12,13 +11,15 @@
 class QuickSort : public Algorithm {
 private:
     bool show_values;
+    float steps_per_s = 10;
 
     int length = 100;
-    float speed = 10;
-
-    std::vector<int> values;
     int min_value = 0;
     int max_value = 500;
+
+    std::vector<int> values;
+    std::size_t pivot;
+    std::pair<std::size_t, std::size_t> swap_indices;
 
     float getRatio(int value) {
         return static_cast<float>(value - min_value) / (max_value - min_value);
@@ -28,7 +29,7 @@ public:
     void showControlPanel(ImVec2 pos, ImVec2 size) {
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
-        ImGui::Begin("Quicksort Control Panel");
+        ImGui::Begin("Quicksort Control Panel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
         ImGui::Text("Nb Values:");
         ImGui::SameLine();
@@ -46,7 +47,7 @@ public:
         }
 
         ImGui::SliderFloat(
-            "", &speed, 0.1f, 1000.0f, "%.01f step/s",
+            "", &steps_per_s, 1.0f, 100.0f, "%.01f step/s",
             ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
         ImGui::SameLine();
         if(ImGui::Button("Play")) {
@@ -63,7 +64,7 @@ public:
     void showValues(ImVec2 pos, ImVec2 size) {
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
-        ImGui::Begin("Values");
+        ImGui::Begin("Values", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImDrawList * draw_list = ImGui::GetWindowDrawList();
 
         ImVec2 content_min_p = ImGui::GetWindowContentRegionMin();
@@ -77,9 +78,9 @@ public:
         const float content_height = (content_max_p.y - content_min_p.y);
 
         const float width = content_width / values.size();
-        for(int i = 0; i < values.size(); ++i) {
-            float ratio = getRatio(values[i]);
-            float height = ratio * content_height;
+        for(std::size_t i = 0; i < values.size(); ++i) {
+            const float ratio = getRatio(values[i]);
+            const float height = ratio * content_height;
             draw_list->AddRectFilled(
                 ImVec2(content_min_p.x + (i + 1) * width,
                        content_max_p.y - height),
