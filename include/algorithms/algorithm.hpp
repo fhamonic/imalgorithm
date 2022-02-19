@@ -5,7 +5,7 @@
 
 class Algorithm {
 public:
-    virtual void show() = 0;
+    virtual void show(ImVec2 pos, ImVec2 size) = 0;
 };
 
 #endif  // IMALGORITHM_ALGORITHM_HPP

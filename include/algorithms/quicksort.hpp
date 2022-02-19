@@ -15,37 +15,31 @@ private:
     int length = 100;
 
     std::vector<int> values;
-    int min_value;
-    int max_value;
+    int min_value = 0;
+    int max_value = 500;
 
     float getRatio(int value) {
         return static_cast<float>(value - min_value) / (max_value - min_value);
     }
 
 public:
-    void showControlPanel() {
-        ImGuiIO & io = ImGui::GetIO();
-        ImVec2 main_window_size = io.DisplaySize;
-        ImGui::SetNextWindowSize(ImVec2(main_window_size.x, 100));
-        ImGui::SetNextWindowPos(ImVec2(0, main_window_size.y - 100));
-
+    void showControlPanel(ImVec2 pos, ImVec2 size) {
+        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowSize(size);
         ImGui::Begin("Quicksort Control Panel");
 
         ImGui::Text("Nb Values:");
         ImGui::SameLine();
         ImGui::InputInt("", &length, 0);
         ImGui::SameLine();
-        if(ImGui::Button("Generate")) {
+        if(ImGui::Button("Generate") && length > 0) {
             std::random_device rnd_device;
             std::mt19937 mersenne_engine{rnd_device()};
-            std::uniform_int_distribution<int> dist{1, 500};
+            std::uniform_int_distribution<int> dist{min_value, max_value};
             values.resize(length);
             std::ranges::generate(values, [&dist, &mersenne_engine]() {
                 return dist(mersenne_engine);
             });
-            auto bounds = std::ranges::minmax(values);
-            min_value = bounds.min;
-            max_value = bounds.max;
             started = true;
         }
 
@@ -58,34 +52,42 @@ public:
 
         ImGui::End();
     }
-    void showValues() {
-        ImGuiIO & io = ImGui::GetIO();
-        ImVec2 main_window_size = io.DisplaySize;
-        float window_width = io.DisplaySize.x;
-        float window_height = io.DisplaySize.y;
-
-        ImGui::SetNextWindowSize(ImVec2(window_width, window_height - 100));
-        ImGui::SetNextWindowPos(ImVec2(0, 0));
-
+    void showValues(ImVec2 pos, ImVec2 size) {
+        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowSize(size);
         ImGui::Begin("Values");
         ImDrawList * draw_list = ImGui::GetWindowDrawList();
-        const ImVec2 p = ImGui::GetCursorScreenPos();
 
-        float width = window_width / values.size();
+        ImVec2 content_min_p = ImGui::GetWindowContentRegionMin();
+        ImVec2 content_max_p = ImGui::GetWindowContentRegionMax();
+        content_min_p.x += ImGui::GetWindowPos().x;
+        content_min_p.y += ImGui::GetWindowPos().y;
+        content_max_p.x += ImGui::GetWindowPos().x;
+        content_max_p.y += ImGui::GetWindowPos().y;
+
+        const float content_width = (content_max_p.x - content_min_p.x);
+        const float content_height = (content_max_p.y - content_min_p.y);
+
+        const float width = content_width / values.size();
         for(int i = 0; i < values.size(); ++i) {
             float ratio = getRatio(values[i]);
-            float height = ratio * window_height;
+            float height = ratio * content_height;
             draw_list->AddRectFilled(
-                ImVec2(p.x + (i + 1) * width, p.y + window_height - height),
-                ImVec2(p.x + i * width, p.y + window_height),
+                ImVec2(content_min_p.x + (i + 1) * width,
+                       content_max_p.y - height),
+                ImVec2(content_min_p.x + i * width,
+                       content_min_p.y + content_height),
                 IM_COL32(255 - ratio * 255, 0, ratio * 255, 255));
         }
 
         ImGui::End();
     }
-    void show() {
-        showControlPanel();
-        if(started) showValues();
+    void show(ImVec2 pos, ImVec2 size) {
+        showControlPanel(ImVec2(pos.x, pos.y + size.y - 100),
+                         ImVec2(size.x, 100));
+        if(started) {
+            showValues(pos, ImVec2(size.x, size.y - 100));
+        }
     };
 };
 
