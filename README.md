@@ -1,6 +1,6 @@
 # ImAlgorithm
 
-ImAlgorithm is an educative tool for visualizing algorithms execution. It makes use of the ImGui library and modern features of C++20.
+ImAlgorithm is an educational tool to visualize the execution of algorithms. It uses ImGui library and modern C++20 features.
 
 Work in progress.
 
