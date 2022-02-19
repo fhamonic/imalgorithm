@@ -12,11 +12,14 @@
 #include "algorithms/quicksort/quicksort_coroutine.hpp"
 
 namespace ImAlgorithm {
+namespace quicksort {
 
 class QuickSortGUI : public AlgorithmGUI {
 private:
     bool play = false;
-    float steps_per_s = 10;
+    bool b_highlight_pivot = true;
+    bool b_highlight_cmp = true;
+    float steps_per_s = 5;
 
     int length = 100;
     int min_value = 0;
@@ -25,9 +28,10 @@ private:
     std::vector<int> values;
     std::stack<std::pair<std::size_t, std::size_t>> bounds;
     std::size_t pivot;
-    std::pair<std::size_t, std::size_t> swap_indices;
+    std::pair<std::size_t, std::size_t> cmp_indices;
 
     std::optional<QuicksortCoroutine> quicksort_coroutine;
+    QuicksortStepFlags step_flags;
 
 public:
     void showControlPanel(ImVec2 pos, ImVec2 size) {
@@ -49,7 +53,7 @@ public:
                 return dist(mersenne_engine);
             });
             quicksort_coroutine.emplace(
-                quicksort(values, bounds, pivot, swap_indices));
+                quicksort(values, bounds, pivot, cmp_indices));
             play = false;
         }
 
@@ -68,10 +72,16 @@ public:
         if(ImGui::Button("Step forward")) {
             play = false;
             if(quicksort_coroutine.has_value()) {
-                if(!quicksort_coroutine->finished())
+                if(!quicksort_coroutine->finished()) {
                     quicksort_coroutine->advance_to_next_step();
+                    step_flags = quicksort_coroutine->current_step();
+                }
             }
         }
+
+        ImGui::Checkbox("Highlight pivot", &b_highlight_pivot);
+        ImGui::SameLine();
+        ImGui::Checkbox("Highlight comparison", &b_highlight_cmp);
 
         ImGui::End();
     }
@@ -93,16 +103,37 @@ public:
         const float content_height = (content_max_p.y - content_min_p.y);
 
         const float width = content_width / values.size();
-        for(std::size_t i = 0; i < values.size(); ++i) {
-            const float ratio = static_cast<float>(values[i] - min_value) /
-                                (max_value - min_value);
-            const float height = ratio * content_height;
+
+        auto draw_value_rect = [&](std::size_t i, ImU32 col) {
+            const float height = content_height *
+                                 static_cast<float>(values[i] - min_value) /
+                                 (max_value - min_value);
             draw_list->AddRectFilled(
                 ImVec2(content_min_p.x + (i + 1) * width,
                        content_max_p.y - height),
-                ImVec2(content_min_p.x + i * width,
-                       content_min_p.y + content_height),
-                IM_COL32(255 - ratio * 255, 0, ratio * 255, 255));
+                ImVec2(content_min_p.x + i * width, content_max_p.y), col);
+        };
+
+        for(std::size_t i = 0; i < values.size(); ++i) {
+            const float c = 200 * static_cast<float>(values[i] - min_value) /
+                            (max_value - min_value);
+            draw_value_rect(i, IM_COL32(255 - c, 0, c, 255));
+        }
+
+        if(b_highlight_pivot &&
+           step_flags & QuicksortStepFlags_HighlightPivot) {
+            draw_value_rect(pivot, IM_COL32(0, 255, 0, 255));
+            const float height = content_height *
+                                 static_cast<float>(values[pivot] - min_value) /
+                                 (max_value - min_value);
+            draw_list->AddRectFilled(
+                ImVec2(content_min_p.x, content_max_p.y - height),
+                ImVec2(content_max_p.x, content_max_p.y - height - 1),
+                IM_COL32(0, 255, 0, 255));
+        }
+        if(b_highlight_cmp && step_flags & QuicksortStepFlags_HighlightCmp) {
+            draw_value_rect(cmp_indices.first, IM_COL32(255, 255, 255, 255));
+            draw_value_rect(cmp_indices.second, IM_COL32(255, 255, 255, 255));
         }
 
         ImGui::End();
@@ -115,11 +146,13 @@ public:
                 static float spare_time = 0.0f;
                 ImGuiIO & io = ImGui::GetIO();
                 int nb_steps = (spare_time + io.DeltaTime) * steps_per_s;
-                spare_time = (spare_time + io.DeltaTime) * steps_per_s - nb_steps;
-                int i = 0;
-                while(!quicksort_coroutine->finished() && i < nb_steps) {
+                spare_time =
+                    (spare_time + io.DeltaTime) * steps_per_s - nb_steps;
+
+                for(int i = 0; i < nb_steps; ++i) {
+                    if(quicksort_coroutine->finished()) break;
                     quicksort_coroutine->advance_to_next_step();
-                    ++i;
+                    step_flags = quicksort_coroutine->current_step();
                 }
                 play = !quicksort_coroutine->finished();
             }
@@ -128,6 +161,7 @@ public:
     };
 };
 
+}  // namespace quicksort
 }  // namespace ImAlgorithm
 
 #endif  // IMALGORITHM_QUICKSORT_HPP

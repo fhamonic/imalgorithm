@@ -49,7 +49,7 @@ int main() {
             if(ImGui::BeginMenu("Algorithms")) {
                 if(ImGui::MenuItem("-- None --")) algorithm.reset();
                 if(ImGui::MenuItem("Quicksort"))
-                    algorithm.emplace(std::make_unique<QuickSortGUI>());
+                    algorithm.emplace(std::make_unique<quicksort::QuickSortGUI>());
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Help")) {
