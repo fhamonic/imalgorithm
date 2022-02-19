@@ -5,6 +5,7 @@
 #include <optional>
 #include <random>
 #include <ranges>
+#include <stack>
 #include <vector>
 
 #include "algorithms/algorithm_gui.hpp"
@@ -14,6 +15,7 @@ namespace ImAlgorithm {
 
 class QuickSortGUI : public AlgorithmGUI {
 private:
+    bool play = false;
     float steps_per_s = 10;
 
     int length = 100;
@@ -21,6 +23,7 @@ private:
     int max_value = 500;
 
     std::vector<int> values;
+    std::stack<std::pair<std::size_t, std::size_t>> bounds;
     std::size_t pivot;
     std::pair<std::size_t, std::size_t> swap_indices;
 
@@ -45,7 +48,9 @@ public:
             std::ranges::generate(values, [&dist, &mersenne_engine]() {
                 return dist(mersenne_engine);
             });
-            quicksort_coroutine.emplace(quicksort(values, pivot, swap_indices));
+            quicksort_coroutine.emplace(
+                quicksort(values, bounds, pivot, swap_indices));
+            play = false;
         }
 
         ImGui::SliderFloat(
@@ -53,12 +58,15 @@ public:
             ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
         ImGui::SameLine();
         if(ImGui::Button("Play")) {
+            play = true;
         }
         ImGui::SameLine();
         if(ImGui::Button("Pause")) {
+            play = false;
         }
         ImGui::SameLine();
         if(ImGui::Button("Step forward")) {
+            play = false;
             if(quicksort_coroutine.has_value()) {
                 if(!quicksort_coroutine->finished())
                     quicksort_coroutine->advance_to_next_step();
@@ -103,6 +111,18 @@ public:
         showControlPanel(ImVec2(pos.x, pos.y + size.y - 100),
                          ImVec2(size.x, 100));
         if(quicksort_coroutine.has_value()) {
+            if(play) {
+                static float spare_time = 0.0f;
+                ImGuiIO & io = ImGui::GetIO();
+                int nb_steps = (spare_time + io.DeltaTime) * steps_per_s;
+                spare_time = (spare_time + io.DeltaTime) * steps_per_s - nb_steps;
+                int i = 0;
+                while(!quicksort_coroutine->finished() && i < nb_steps) {
+                    quicksort_coroutine->advance_to_next_step();
+                    ++i;
+                }
+                play = !quicksort_coroutine->finished();
+            }
             showValues(pos, ImVec2(size.x, size.y - 100));
         }
     };
