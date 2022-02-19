@@ -29,7 +29,7 @@ int main() {
     std::optional<std::unique_ptr<Algorithm>> algorithm;
 
     window.setTitle("ImAlgorithm");
-    window.resetGLStates();  // call it if you only draw ImGui. Otherwise not
+    // window.resetGLStates();  // call it if you only draw ImGui. Otherwise not
                              // needed.
     sf::Clock deltaClock;
     while(window.isOpen()) {

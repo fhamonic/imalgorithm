@@ -11,8 +11,10 @@
 
 class QuickSort : public Algorithm {
 private:
-    bool started;
+    bool show_values;
+
     int length = 100;
+    float speed = 10;
 
     std::vector<int> values;
     int min_value = 0;
@@ -40,11 +42,17 @@ public:
             std::ranges::generate(values, [&dist, &mersenne_engine]() {
                 return dist(mersenne_engine);
             });
-            started = true;
+            show_values = true;
         }
 
-        if(ImGui::Button("Reset")) {
-            started = false;
+        ImGui::SliderFloat(
+            "", &speed, 0.1f, 1000.0f, "%.01f step/s",
+            ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
+        ImGui::SameLine();
+        if(ImGui::Button("Play")) {
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Pause")) {
         }
         ImGui::SameLine();
         if(ImGui::Button("Step forward")) {
@@ -85,7 +93,7 @@ public:
     void show(ImVec2 pos, ImVec2 size) {
         showControlPanel(ImVec2(pos.x, pos.y + size.y - 100),
                          ImVec2(size.x, 100));
-        if(started) {
+        if(show_values) {
             showValues(pos, ImVec2(size.x, size.y - 100));
         }
     };
