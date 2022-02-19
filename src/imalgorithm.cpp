@@ -10,9 +10,10 @@
 
 // #include "implot.h"
 
-#include "algorithms/algorithm.hpp"
+#include "algorithms/algorithm_gui.hpp"
+#include "algorithms/quicksort/quicksort_gui.hpp"
 
-#include "algorithms/quicksort.hpp"
+using namespace ImAlgorithm;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(640, 480), "");
@@ -26,10 +27,10 @@ int main() {
         "build/_deps/imgui-src/misc/fonts/DroidSans.ttf", 96.0f);
     ImGui::SFML::UpdateFontTexture();
 
-    std::optional<std::unique_ptr<Algorithm>> algorithm;
+    std::optional<std::unique_ptr<AlgorithmGUI>> algorithm;
 
     window.setTitle("ImAlgorithm");
-    // window.resetGLStates();  // call it if you only draw ImGui. Otherwise not
+    window.resetGLStates();  // call it if you only draw ImGui. Otherwise not
                              // needed.
     sf::Clock deltaClock;
     while(window.isOpen()) {
@@ -48,7 +49,7 @@ int main() {
             if(ImGui::BeginMenu("Algorithms")) {
                 if(ImGui::MenuItem("-- None --")) algorithm.reset();
                 if(ImGui::MenuItem("Quicksort"))
-                    algorithm.emplace(std::make_unique<QuickSort>());
+                    algorithm.emplace(std::make_unique<QuickSortGUI>());
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Help")) {

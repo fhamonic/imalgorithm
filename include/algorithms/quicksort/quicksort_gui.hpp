@@ -2,15 +2,18 @@
 #define IMALGORITHM_QUICKSORT_HPP
 
 #include <algorithm>
+#include <optional>
 #include <random>
 #include <ranges>
 #include <vector>
 
-#include "algorithms/algorithm.hpp"
+#include "algorithms/algorithm_gui.hpp"
+#include "algorithms/quicksort/quicksort_coroutine.hpp"
 
-class QuickSort : public Algorithm {
+namespace ImAlgorithm {
+
+class QuickSortGUI : public AlgorithmGUI {
 private:
-    bool show_values;
     float steps_per_s = 10;
 
     int length = 100;
@@ -21,15 +24,14 @@ private:
     std::size_t pivot;
     std::pair<std::size_t, std::size_t> swap_indices;
 
-    float getRatio(int value) {
-        return static_cast<float>(value - min_value) / (max_value - min_value);
-    }
+    std::optional<QuicksortCoroutine> quicksort_coroutine;
 
 public:
     void showControlPanel(ImVec2 pos, ImVec2 size) {
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
-        ImGui::Begin("Quicksort Control Panel", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin("Quicksort Control Panel", nullptr,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
         ImGui::Text("Nb Values:");
         ImGui::SameLine();
@@ -43,7 +45,7 @@ public:
             std::ranges::generate(values, [&dist, &mersenne_engine]() {
                 return dist(mersenne_engine);
             });
-            show_values = true;
+            quicksort_coroutine.emplace(quicksort(values, pivot, swap_indices));
         }
 
         ImGui::SliderFloat(
@@ -57,6 +59,10 @@ public:
         }
         ImGui::SameLine();
         if(ImGui::Button("Step forward")) {
+            if(quicksort_coroutine.has_value()) {
+                if(!quicksort_coroutine->finished())
+                    quicksort_coroutine->advance_to_next_step();
+            }
         }
 
         ImGui::End();
@@ -64,7 +70,8 @@ public:
     void showValues(ImVec2 pos, ImVec2 size) {
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
-        ImGui::Begin("Values", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin("Values", nullptr,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImDrawList * draw_list = ImGui::GetWindowDrawList();
 
         ImVec2 content_min_p = ImGui::GetWindowContentRegionMin();
@@ -79,7 +86,8 @@ public:
 
         const float width = content_width / values.size();
         for(std::size_t i = 0; i < values.size(); ++i) {
-            const float ratio = getRatio(values[i]);
+            const float ratio = static_cast<float>(values[i] - min_value) /
+                                (max_value - min_value);
             const float height = ratio * content_height;
             draw_list->AddRectFilled(
                 ImVec2(content_min_p.x + (i + 1) * width,
@@ -94,10 +102,12 @@ public:
     void show(ImVec2 pos, ImVec2 size) {
         showControlPanel(ImVec2(pos.x, pos.y + size.y - 100),
                          ImVec2(size.x, 100));
-        if(show_values) {
+        if(quicksort_coroutine.has_value()) {
             showValues(pos, ImVec2(size.x, size.y - 100));
         }
     };
 };
+
+}  // namespace ImAlgorithm
 
 #endif  // IMALGORITHM_QUICKSORT_HPP
