@@ -103,7 +103,7 @@ QuicksortCoroutine quicksort_hoare(
             cmp_indices = std::make_pair(right_cursor, pivot_index);
             co_yield(QuicksortStepFlags_HighlightPivot |
                      QuicksortStepFlags_HighlightCmp);
-            while(right_cursor > 0 &&
+            while(right_cursor > begin &&
                   values[right_cursor] >= values[pivot_index]) {
                 --right_cursor;
                 cmp_indices = std::make_pair(right_cursor, pivot_index);
