@@ -47,9 +47,13 @@ int main() {
         float menu_bar_height;
         if(ImGui::BeginMainMenuBar()) {
             if(ImGui::BeginMenu("Algorithms")) {
-                if(ImGui::MenuItem("-- None --")) algorithm.reset();
-                if(ImGui::MenuItem("Quicksort"))
-                    algorithm.emplace(std::make_unique<quicksort::QuickSortGUI>());
+                if(ImGui::BeginMenu("Quicksort")) {
+                    if(ImGui::MenuItem("Lomuto")) {
+                        algorithm.emplace(std::make_unique<quicksort::QuickSortGUI>());
+                        window.setTitle("ImAlgorithm : Quicksort Lomuto");
+                    }
+                    ImGui::EndMenu();
+                }
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Help")) {

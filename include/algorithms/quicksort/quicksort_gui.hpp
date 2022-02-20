@@ -53,7 +53,7 @@ public:
                 return dist(mersenne_engine);
             });
             quicksort_coroutine.emplace(
-                quicksort(values, bounds, pivot, cmp_indices));
+                quicksort_lomuto(values, bounds, pivot, cmp_indices));
             play = false;
         }
 
