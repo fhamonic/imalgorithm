@@ -68,12 +68,13 @@ QuicksortCoroutine quicksort_lomuto(
     co_yield QuicksortStepFlags_Nop;
 }
 
-// TODO
+// TODO : debug a degenrative case
 QuicksortCoroutine quicksort_hoare(
     std::vector<int> & values,
     std::stack<std::pair<std::size_t, std::size_t>> & bounds,
     std::size_t & pivot_index,
-    std::pair<std::size_t, std::size_t> & cmp_indices) noexcept {
+    std::pair<std::size_t, std::size_t> & cmp_indices,
+    std::pair<std::size_t, std::size_t> & swap_indices) noexcept {
     bounds.emplace(0, values.size());
 
     while(!bounds.empty()) {
@@ -86,18 +87,47 @@ QuicksortCoroutine quicksort_hoare(
         pivot_index = end - 1;
         co_yield QuicksortStepFlags_HighlightPivot;
 
-        std::size_t cursor = begin;
-        for(std::size_t i = begin; i < pivot_index; ++i) {
-            if(values[i] < values[pivot_index]) {
-                cmp_indices = std::make_pair(i, cursor);
-                std::swap(values[i], values[cursor]);
+        std::size_t left_cursor = begin;
+        std::size_t right_cursor = end - 2;
+        for(;;) {
+            cmp_indices = std::make_pair(left_cursor, pivot_index);
+            co_yield(QuicksortStepFlags_HighlightPivot |
+                     QuicksortStepFlags_HighlightCmp);
+            while(left_cursor < end &&
+                  values[left_cursor] < values[pivot_index]) {
+                ++left_cursor;
+                cmp_indices = std::make_pair(left_cursor, pivot_index);
                 co_yield(QuicksortStepFlags_HighlightPivot |
                          QuicksortStepFlags_HighlightCmp);
-                ++cursor;
             }
+            cmp_indices = std::make_pair(right_cursor, pivot_index);
+            co_yield(QuicksortStepFlags_HighlightPivot |
+                     QuicksortStepFlags_HighlightCmp);
+            while(right_cursor > 0 &&
+                  values[right_cursor] >= values[pivot_index]) {
+                --right_cursor;
+                cmp_indices = std::make_pair(right_cursor, pivot_index);
+                co_yield(QuicksortStepFlags_HighlightPivot |
+                         QuicksortStepFlags_HighlightCmp);
+            }
+            if(right_cursor <= left_cursor) {
+                break;
+            }
+
+            swap_indices = std::make_pair(left_cursor, right_cursor);
+            co_yield(QuicksortStepFlags_HighlightPivot |
+                     QuicksortStepFlags_HighlightSwap);
+            if(left_cursor == pivot_index)
+                pivot_index = right_cursor;
+            else if(right_cursor == pivot_index)
+                pivot_index = left_cursor;
+            std::swap(values[left_cursor], values[right_cursor]);
+            co_yield(QuicksortStepFlags_HighlightPivot |
+                     QuicksortStepFlags_HighlightSwap);
         }
-        std::swap(values[cursor], values[pivot_index]);
-        pivot_index = cursor;
+
+        std::swap(values[left_cursor], values[pivot_index]);
+        pivot_index = left_cursor;
         co_yield QuicksortStepFlags_HighlightPivot;
 
         bounds.pop();

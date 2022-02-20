@@ -14,6 +14,7 @@
 namespace ImAlgorithm {
 namespace quicksort {
 
+template <decltype(quicksort_lomuto) F>
 class QuickSortGUI : public AlgorithmGUI {
 private:
     bool play = false;
@@ -55,8 +56,9 @@ public:
                 return dist(mersenne_engine);
             });
             quicksort_coroutine.emplace(
-                quicksort_lomuto(values, bounds, pivot, cmp_indices, swap_indices));
+                F(values, bounds, pivot, cmp_indices, swap_indices));
             play = false;
+            step_flags = QuicksortStepFlags_Nop;
         }
 
         ImGui::SliderFloat(
@@ -89,7 +91,7 @@ public:
 
         ImGui::End();
     }
-    void showValues(ImVec2 pos, ImVec2 size) {
+    void showValues(ImVec2 pos, ImVec2 size) const {
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
         ImGui::Begin("Values", nullptr,
@@ -167,7 +169,13 @@ public:
             showValues(pos, ImVec2(size.x, size.y - 100));
         }
     };
+    const char * name() const {
+        return "Quicksort";
+    }
 };
+
+using QuickSortLomutoGUI = QuickSortGUI<quicksort_lomuto>;
+using QuickSortHoareGUI = QuickSortGUI<quicksort_hoare>;
 
 }  // namespace quicksort
 }  // namespace ImAlgorithm

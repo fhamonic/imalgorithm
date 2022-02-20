@@ -64,8 +64,8 @@ int main(int, char **) {
 #endif
 
     // Create window with graphics context
-    GLFWwindow * window = glfwCreateWindow(
-        1280, 720, "ImAlgorithm", NULL, NULL);
+    GLFWwindow * window =
+        glfwCreateWindow(1280, 720, "ImAlgorithm", NULL, NULL);
     if(window == NULL) return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);  // Enable vsync
@@ -123,14 +123,20 @@ int main(int, char **) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        
+
         float menu_bar_height;
         if(ImGui::BeginMainMenuBar()) {
             if(ImGui::BeginMenu("Algorithms")) {
                 if(ImGui::BeginMenu("Quicksort")) {
                     if(ImGui::MenuItem("Lomuto")) {
-                        algorithm.emplace(std::make_unique<ImAlgorithm::quicksort::QuickSortGUI>());
-                        glfwSetWindowTitle(window, "ImAlgorithm : Quicksort Lomuto");
+                        algorithm.emplace(
+                            std::make_unique<
+                                ImAlgorithm::quicksort::QuickSortLomutoGUI>());
+                    }
+                    if(ImGui::MenuItem("Hoare")) {
+                        algorithm.emplace(
+                            std::make_unique<
+                                ImAlgorithm::quicksort::QuickSortHoareGUI>());
                     }
                     ImGui::EndMenu();
                 }
@@ -144,6 +150,8 @@ int main(int, char **) {
         }
 
         if(algorithm.has_value()) {
+
+                        glfwSetWindowTitle(window, algorithm->get()->name());
             ImGuiIO & io = ImGui::GetIO();
             algorithm->get()->show(
                 ImVec2(0, menu_bar_height),
