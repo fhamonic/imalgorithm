@@ -17,8 +17,9 @@ using QuicksortStepFlags = int;
 enum QuicksortStepFlags_ : int {
     QuicksortStepFlags_Nop = 0,
     QuicksortStepFlags_HighlightCmp = 1,
-    QuicksortStepFlags_HighlightPivot = 2,
-    QuicksortStepFlags_DisplayBounds = 4
+    QuicksortStepFlags_HighlightSwap = 2,
+    QuicksortStepFlags_HighlightPivot = 4,
+    QuicksortStepFlags_DisplayBounds = 8
 };
 
 using QuicksortCoroutine = AlgorithmCoroutine<QuicksortStepFlags>;
@@ -27,8 +28,8 @@ QuicksortCoroutine quicksort_lomuto(
     std::vector<int> & values,
     std::stack<std::pair<std::size_t, std::size_t>> & bounds,
     std::size_t & pivot_index,
-    std::pair<std::size_t, std::size_t> & cmp_indices) noexcept {
-
+    std::pair<std::size_t, std::size_t> & cmp_indices,
+    std::pair<std::size_t, std::size_t> & swap_indices) noexcept {
     bounds.emplace(0, values.size());
 
     while(!bounds.empty()) {
@@ -43,10 +44,16 @@ QuicksortCoroutine quicksort_lomuto(
 
         std::size_t cursor = begin;
         for(std::size_t i = begin; i < pivot_index; ++i) {
+            cmp_indices = std::make_pair(i, pivot_index);
+            co_yield(QuicksortStepFlags_HighlightPivot |
+                     QuicksortStepFlags_HighlightCmp);
             if(values[i] < values[pivot_index]) {
-                cmp_indices = std::make_pair(i, cursor);
+                swap_indices = std::make_pair(i, cursor);
+                co_yield(QuicksortStepFlags_HighlightPivot |
+                         QuicksortStepFlags_HighlightSwap);
                 std::swap(values[i], values[cursor]);
-                co_yield (QuicksortStepFlags_HighlightPivot | QuicksortStepFlags_HighlightCmp);
+                co_yield(QuicksortStepFlags_HighlightPivot |
+                         QuicksortStepFlags_HighlightSwap);
                 ++cursor;
             }
         }
@@ -67,7 +74,6 @@ QuicksortCoroutine quicksort_hoare(
     std::stack<std::pair<std::size_t, std::size_t>> & bounds,
     std::size_t & pivot_index,
     std::pair<std::size_t, std::size_t> & cmp_indices) noexcept {
-
     bounds.emplace(0, values.size());
 
     while(!bounds.empty()) {
@@ -85,7 +91,8 @@ QuicksortCoroutine quicksort_hoare(
             if(values[i] < values[pivot_index]) {
                 cmp_indices = std::make_pair(i, cursor);
                 std::swap(values[i], values[cursor]);
-                co_yield (QuicksortStepFlags_HighlightPivot | QuicksortStepFlags_HighlightCmp);
+                co_yield(QuicksortStepFlags_HighlightPivot |
+                         QuicksortStepFlags_HighlightCmp);
                 ++cursor;
             }
         }
@@ -100,7 +107,7 @@ QuicksortCoroutine quicksort_hoare(
     co_yield QuicksortStepFlags_Nop;
 }
 
-}  // namespace Quicksort
+}  // namespace quicksort
 }  // namespace ImAlgorithm
 
 #endif  // IMALGORITHM_QUICKSORT_COROUTINE_HPP

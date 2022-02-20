@@ -19,6 +19,7 @@ private:
     bool play = false;
     bool b_highlight_pivot = true;
     bool b_highlight_cmp = true;
+    bool b_highlight_swap = true;
     float steps_per_s = 5;
 
     int length = 100;
@@ -29,6 +30,7 @@ private:
     std::stack<std::pair<std::size_t, std::size_t>> bounds;
     std::size_t pivot;
     std::pair<std::size_t, std::size_t> cmp_indices;
+    std::pair<std::size_t, std::size_t> swap_indices;
 
     std::optional<QuicksortCoroutine> quicksort_coroutine;
     QuicksortStepFlags step_flags;
@@ -53,7 +55,7 @@ public:
                 return dist(mersenne_engine);
             });
             quicksort_coroutine.emplace(
-                quicksort_lomuto(values, bounds, pivot, cmp_indices));
+                quicksort_lomuto(values, bounds, pivot, cmp_indices, swap_indices));
             play = false;
         }
 
@@ -82,6 +84,8 @@ public:
         ImGui::Checkbox("Highlight pivot", &b_highlight_pivot);
         ImGui::SameLine();
         ImGui::Checkbox("Highlight comparison", &b_highlight_cmp);
+        ImGui::SameLine();
+        ImGui::Checkbox("Highlight swap", &b_highlight_swap);
 
         ImGui::End();
     }
@@ -134,6 +138,10 @@ public:
         if(b_highlight_cmp && step_flags & QuicksortStepFlags_HighlightCmp) {
             draw_value_rect(cmp_indices.first, IM_COL32(255, 255, 255, 255));
             draw_value_rect(cmp_indices.second, IM_COL32(255, 255, 255, 255));
+        }
+        if(b_highlight_swap && step_flags & QuicksortStepFlags_HighlightSwap) {
+            draw_value_rect(swap_indices.first, IM_COL32(255, 255, 255, 255));
+            draw_value_rect(swap_indices.second, IM_COL32(255, 255, 255, 255));
         }
 
         ImGui::End();
