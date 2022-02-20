@@ -25,20 +25,18 @@ set(HARDCORE_WARNINGS_LIST
 )
 
 # ################### Modules ####################
-set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
-set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include(GNUInstallDirs)
 include(CMakeBuildTypeUtils)
 
-add_subdirectory(dependencies)
 
 # ################### Packages ####################
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 # ################### IMGUI TEST #####################
-add_executable(imalgorithm src/imalgorithm.cpp)
+add_executable(imalgorithm src/main.cpp imgui_backends/imgui_impl_glfw.cpp
+imgui_backends/imgui_impl_opengl3.cpp)
 target_include_directories(imalgorithm PUBLIC include)
-target_link_libraries(imalgorithm PUBLIC ImGui-SFML::ImGui-SFML)
-target_link_libraries(imalgorithm PUBLIC CONAN_PKG::implot)
+target_include_directories(imalgorithm PUBLIC include imgui_backends)
+target_link_libraries(imalgorithm PUBLIC CONAN_PKG::imgui CONAN_PKG::glfw CONAN_PKG::glew)

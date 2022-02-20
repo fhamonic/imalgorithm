@@ -12,8 +12,7 @@ Work in progress.
 
 ## Build process
 The build process requires CMake 3.12 (https://cmake.org/) or more and the Conan C++ package manager (https://conan.io/).
-
-ImGui, SFML and ImGui-SFML are fetched using the CMake scripts of https://github.com/eliasdaler/imgui-sfml.git.
+All dependencies are resolved with Conan.
 
 ## How to Compile
     make
