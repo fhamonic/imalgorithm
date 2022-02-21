@@ -23,4 +23,3 @@ All dependencies are resolved with Conan.
 ## Screenshots
 
 ![Quicksort](screenshots/quicksort.png)
-    

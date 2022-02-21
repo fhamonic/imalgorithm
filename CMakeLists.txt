@@ -34,9 +34,8 @@ include(CMakeBuildTypeUtils)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-# ################### IMGUI TEST #####################
+# ################### IMALGORITHM #####################
 add_executable(imalgorithm src/main.cpp imgui_backends/imgui_impl_glfw.cpp
 imgui_backends/imgui_impl_opengl3.cpp)
-target_include_directories(imalgorithm PUBLIC include)
 target_include_directories(imalgorithm PUBLIC include imgui_backends)
 target_link_libraries(imalgorithm PUBLIC CONAN_PKG::imgui CONAN_PKG::glfw CONAN_PKG::glew)
