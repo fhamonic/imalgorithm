@@ -58,7 +58,7 @@ public:
             quicksort_coroutine.emplace(
                 F(values, bounds, pivot, cmp_indices, swap_indices));
             play = false;
-            step_flags = QuicksortStepFlags_Nop;
+            step_flags = NoOp;
         }
 
         ImGui::SliderFloat(
@@ -127,7 +127,7 @@ public:
         }
 
         if(b_highlight_pivot &&
-           step_flags & QuicksortStepFlags_HighlightPivot) {
+           step_flags & HighlightPivot) {
             draw_value_rect(pivot, IM_COL32(0, 255, 0, 255));
             const float height = content_height *
                                  static_cast<float>(values[pivot] - min_value) /
@@ -137,11 +137,11 @@ public:
                 ImVec2(content_max_p.x, content_max_p.y - height - 1),
                 IM_COL32(0, 255, 0, 255));
         }
-        if(b_highlight_cmp && step_flags & QuicksortStepFlags_HighlightCmp) {
+        if(b_highlight_cmp && step_flags & HighlightCmp) {
             draw_value_rect(cmp_indices.first, IM_COL32(255, 255, 255, 255));
             draw_value_rect(cmp_indices.second, IM_COL32(255, 255, 255, 255));
         }
-        if(b_highlight_swap && step_flags & QuicksortStepFlags_HighlightSwap) {
+        if(b_highlight_swap && step_flags & HighlightSwap) {
             draw_value_rect(swap_indices.first, IM_COL32(255, 255, 255, 255));
             draw_value_rect(swap_indices.second, IM_COL32(255, 255, 255, 255));
         }
