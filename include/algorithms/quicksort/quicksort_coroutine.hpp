@@ -45,7 +45,7 @@ QuicksortCoroutine quicksort_lomuto(
         for(std::size_t i = begin; i < pivot_index; ++i) {
             cmp_indices = std::make_pair(i, pivot_index);
             co_yield(HighlightPivot | HighlightCmp);
-            if(values[i] < values[pivot_index]) {
+            if(values[i] <= values[pivot_index]) {
                 swap_indices = std::make_pair(i, cursor);
                 co_yield(HighlightPivot | HighlightSwap);
                 std::swap(values[i], values[cursor]);
@@ -53,9 +53,11 @@ QuicksortCoroutine quicksort_lomuto(
                 ++cursor;
             }
         }
+        swap_indices = std::make_pair(cursor, pivot_index);
+        co_yield(HighlightPivot | HighlightSwap);
         std::swap(values[cursor], values[pivot_index]);
         pivot_index = cursor;
-        co_yield HighlightPivot;
+        co_yield(HighlightPivot | HighlightSwap);
 
         bounds.pop();
         bounds.emplace(pivot_index + 1, end);
@@ -64,7 +66,6 @@ QuicksortCoroutine quicksort_lomuto(
     co_yield NoOp;
 }
 
-// TODO : debug a degenrative case
 QuicksortCoroutine quicksort_hoare(
     std::vector<int> & values,
     std::stack<std::pair<std::size_t, std::size_t>> & bounds,
@@ -85,36 +86,32 @@ QuicksortCoroutine quicksort_hoare(
         std::size_t left_cursor = begin;
         std::size_t right_cursor = end - 2;
         for(;;) {
-            cmp_indices = std::make_pair(left_cursor, pivot_index);
-            co_yield(HighlightPivot | HighlightCmp);
-            while(left_cursor < end &&
-                  values[left_cursor] < values[pivot_index]) {
-                ++left_cursor;
+            for(;; ++left_cursor) {
                 cmp_indices = std::make_pair(left_cursor, pivot_index);
                 co_yield(HighlightPivot | HighlightCmp);
+                if(values[left_cursor] >= values[pivot_index]) break;
             }
-
-            cmp_indices = std::make_pair(right_cursor, pivot_index);
-            co_yield(HighlightPivot | HighlightCmp);
-            while(right_cursor > begin &&
-                  values[right_cursor] >= values[pivot_index]) {
-                --right_cursor;
+            for(;; --right_cursor) {
+                if(right_cursor <= left_cursor) goto partition_ok;
                 cmp_indices = std::make_pair(right_cursor, pivot_index);
                 co_yield(HighlightPivot | HighlightCmp);
-            }
-            if(right_cursor <= left_cursor) {
-                break;
+                if(values[right_cursor] < values[pivot_index]) break;
             }
 
             swap_indices = std::make_pair(left_cursor, right_cursor);
             co_yield(HighlightPivot | HighlightSwap);
             std::swap(values[left_cursor], values[right_cursor]);
             co_yield(HighlightPivot | HighlightSwap);
+            ++left_cursor;
+            --right_cursor;
         }
 
+    partition_ok:
+        swap_indices = std::make_pair(left_cursor, pivot_index);
+        co_yield(HighlightPivot | HighlightSwap);
         std::swap(values[left_cursor], values[pivot_index]);
         pivot_index = left_cursor;
-        co_yield HighlightPivot;
+        co_yield(HighlightPivot | HighlightSwap);
 
         bounds.pop();
         bounds.emplace(pivot_index + 1, end);
