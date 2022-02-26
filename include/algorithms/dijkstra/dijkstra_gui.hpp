@@ -8,8 +8,7 @@
 #include <stack>
 #include <vector>
 
-#include "algorithms/algorithm_gui.hpp"
-#include "algorithms/quicksort/quicksort_coroutine.hpp"
+#include "algorithm_gui.hpp"
 
 namespace ImAlgorithm {
 namespace quicksort {
@@ -18,9 +17,6 @@ template <decltype(quicksort_lomuto) F>
 class QuickSortGUI : public AlgorithmGUI {
 private:
     bool play = false;
-    bool b_highlight_pivot = true;
-    bool b_highlight_cmp = true;
-    bool b_highlight_swap = true;
     float steps_per_s = 5;
 
     int length = 100;
@@ -126,6 +122,14 @@ public:
             draw_value_rect(i, IM_COL32(255 - c, 0, c, 255));
         }
 
+        if(b_highlight_cmp && step_flags & HighlightCmp) {
+            draw_value_rect(cmp_indices.first, IM_COL32(255, 255, 255, 255));
+            draw_value_rect(cmp_indices.second, IM_COL32(255, 255, 255, 255));
+        }
+        if(b_highlight_swap && step_flags & HighlightSwap) {
+            draw_value_rect(swap_indices.first, IM_COL32(255, 255, 255, 255));
+            draw_value_rect(swap_indices.second, IM_COL32(255, 255, 255, 255));
+        }
         if(b_highlight_pivot &&
            step_flags & HighlightPivot) {
             draw_value_rect(pivot, IM_COL32(0, 255, 0, 255));
@@ -136,14 +140,6 @@ public:
                 ImVec2(content_min_p.x, content_max_p.y - height),
                 ImVec2(content_max_p.x, content_max_p.y - height - 1),
                 IM_COL32(0, 255, 0, 255));
-        }
-        if(b_highlight_cmp && step_flags & HighlightCmp) {
-            draw_value_rect(cmp_indices.first, IM_COL32(255, 255, 255, 255));
-            draw_value_rect(cmp_indices.second, IM_COL32(255, 255, 255, 255));
-        }
-        if(b_highlight_swap && step_flags & HighlightSwap) {
-            draw_value_rect(swap_indices.first, IM_COL32(255, 255, 255, 255));
-            draw_value_rect(swap_indices.second, IM_COL32(255, 255, 255, 255));
         }
 
         ImGui::End();

@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "algorithms/algorithm_coroutine.hpp"
+#include "algorithm_coroutine.hpp"
 
 namespace ImAlgorithm {
 namespace quicksort {

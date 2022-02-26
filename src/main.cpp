@@ -32,8 +32,9 @@ static void glfw_error_callback(int error, const char * description) {
 #include <memory>
 #include <optional>
 
-#include "algorithms/algorithm_gui.hpp"
-#include "algorithms/quicksort/quicksort_gui.hpp"
+#include "algorithm_gui.hpp"
+#include "algorithms/sorts/bubblesort/bubblesort_gui.hpp"
+#include "algorithms/sorts/quicksort/quicksort_gui.hpp"
 
 int main(int, char **) {
     // Setup window
@@ -127,16 +128,24 @@ int main(int, char **) {
         float menu_bar_height;
         if(ImGui::BeginMainMenuBar()) {
             if(ImGui::BeginMenu("Algorithms")) {
-                if(ImGui::BeginMenu("Quicksort")) {
-                    if(ImGui::MenuItem("Lomuto")) {
+                if(ImGui::BeginMenu("Sorts")) {
+                    if(ImGui::MenuItem("Bubblesort")) {
                         algorithm.emplace(
                             std::make_unique<
-                                ImAlgorithm::quicksort::QuickSortLomutoGUI>());
+                                ImAlgorithm::bubblesort::BubbleSortGUI>());
                     }
-                    if(ImGui::MenuItem("Hoare")) {
-                        algorithm.emplace(
-                            std::make_unique<
-                                ImAlgorithm::quicksort::QuickSortHoareGUI>());
+                    if(ImGui::BeginMenu("Quicksort")) {
+                        if(ImGui::MenuItem("Lomuto")) {
+                            algorithm.emplace(
+                                std::make_unique<ImAlgorithm::quicksort::
+                                                     QuickSortLomutoGUI>());
+                        }
+                        if(ImGui::MenuItem("Hoare")) {
+                            algorithm.emplace(
+                                std::make_unique<ImAlgorithm::quicksort::
+                                                     QuickSortHoareGUI>());
+                        }
+                        ImGui::EndMenu();
                     }
                     ImGui::EndMenu();
                 }
@@ -150,8 +159,7 @@ int main(int, char **) {
         }
 
         if(algorithm.has_value()) {
-
-                        glfwSetWindowTitle(window, algorithm->get()->name());
+            glfwSetWindowTitle(window, algorithm->get()->name());
             ImGuiIO & io = ImGui::GetIO();
             algorithm->get()->show(
                 ImVec2(0, menu_bar_height),

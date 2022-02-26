@@ -3,6 +3,8 @@
 
 #include <imgui.h>
 
+#include "utils/imvec_operators.hpp"
+
 namespace ImAlgorithm {
 
 class AlgorithmGUI {
