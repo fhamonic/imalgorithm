@@ -23,10 +23,10 @@ BubblesortCoroutine bubblesort(
     std::pair<std::size_t, std::size_t> & cmp_indices,
     std::pair<std::size_t, std::size_t> & swap_indices) noexcept {
     bool b_continue = true;
-
+    std::size_t cpt = 0;
     while(b_continue) {
         b_continue = false;
-        for(std::size_t i = 1; i < values.size(); ++i) {
+        for(std::size_t i = 1; i < values.size() - cpt; ++i) {
             cmp_indices = std::make_pair(i - 1, i);
             co_yield(HighlightCmp);
             if(values[i - 1] > values[i]) {
@@ -37,6 +37,7 @@ BubblesortCoroutine bubblesort(
                 co_yield(HighlightSwap);
             }
         }
+        ++cpt;
     }
 
     co_yield NoOp;
