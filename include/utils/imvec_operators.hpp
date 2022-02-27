@@ -21,6 +21,9 @@ inline ImVec2 & operator-=(ImVec2 & v1, const ImVec2 & v2) {
     v1.y -= v2.y;
     return v1;
 }
+inline ImVec2 operator*(const float c, const ImVec2 & v) {
+    return ImVec2(c * v.x, c * v.y);
+}
 
 }  // namespace ImAlgorithm
 

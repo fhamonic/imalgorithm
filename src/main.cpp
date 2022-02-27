@@ -33,6 +33,7 @@ static void glfw_error_callback(int error, const char * description) {
 #include <optional>
 
 #include "algorithm_gui.hpp"
+#include "algorithms/graphs/dijkstra/dijkstra_gui.hpp"
 #include "algorithms/sorts/bubblesort/bubblesort_gui.hpp"
 #include "algorithms/sorts/quicksort/quicksort_gui.hpp"
 
@@ -146,6 +147,14 @@ int main(int, char **) {
                                                      QuickSortHoareGUI>());
                         }
                         ImGui::EndMenu();
+                    }
+                    ImGui::EndMenu();
+                }
+                if(ImGui::BeginMenu("Graphs")) {
+                    if(ImGui::MenuItem("Dijkstra")) {
+                        algorithm.emplace(
+                            std::make_unique<
+                                ImAlgorithm::dijkstra::DijkstraGUI>());
                     }
                     ImGui::EndMenu();
                 }
