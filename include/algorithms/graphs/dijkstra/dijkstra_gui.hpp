@@ -22,7 +22,7 @@ public:
     void showControlPanel(ImVec2 pos, ImVec2 size) {
         ImGui::SetNextWindowPos(pos);
         ImGui::SetNextWindowSize(size);
-        ImGui::Begin("Quicksort Control Panel", nullptr,
+        ImGui::Begin("Dijkstra Control Panel", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
         // ImGui::Text("Nb Values:");
